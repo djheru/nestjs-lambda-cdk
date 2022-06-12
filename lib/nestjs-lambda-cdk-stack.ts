@@ -4,6 +4,7 @@ import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-al
 import { Construct } from 'constructs';
 import { Code, Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { resolve } from 'path';
+import { pascalCase } from 'change-case';
 
 export class NestjsLambdaCdkStack extends Stack {
   constructor(scope: Construct, private id: string, private props?: StackProps) {
@@ -51,7 +52,7 @@ export class NestjsLambdaCdkStack extends Stack {
       integration: new HttpLambdaIntegration(`${this.id}-http-integration`, handler),
     });
 
-    new CfnOutput(this, `${this.id}-api-url`, {
+    new CfnOutput(this, pascalCase(`${this.id}-api-url`), {
       value: httpApi.url!,
     });
   }
