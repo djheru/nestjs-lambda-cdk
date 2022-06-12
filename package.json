@@ -6,6 +6,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "prebuild": "npm run build --prefix ./api",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
