@@ -36,7 +36,7 @@ export class NestjsLambdaCdkStack extends Stack {
       code: Code.fromAsset(resolve(__dirname, '../api/dist'), {
         exclude: ['../api/dist/node_modules'],
       }),
-      handler: 'main.handler',
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_16_X,
       layers: [lambdaLayer],
       environment: {
