@@ -35,6 +35,6 @@ export class ApiPipelineStack extends Stack {
       }),
     });
 
-    pipeline.addStage(new ApiApplicationStage(this, 'dev'));
+    pipeline.addStage(new ApiApplicationStage(this, 'Dev'));
   }
 }
