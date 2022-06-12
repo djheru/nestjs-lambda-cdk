@@ -27,20 +27,21 @@ export class NestjsLambdaCdkStack extends Stack {
     });
 
     const lambdaLayer = new LayerVersion(this, `${this.id}-lambda-layer`, {
-      code: Code.fromAsset(resolve(__dirname, '../api/node_modules')),
+      code: Code.fromAsset(resolve(__dirname, '../api/dist/node_modules')),
       compatibleRuntimes: [Runtime.NODEJS_14_X, Runtime.NODEJS_16_X],
       description: 'Node modules for lambda functions',
     });
 
     const handler = new Function(this, `${this.id}-lambda-fcn`, {
       code: Code.fromAsset(resolve(__dirname, '../api/dist'), {
-        exclude: ['node_modules'],
+        exclude: ['../api/dist/node_modules'],
       }),
       handler: 'main.handler',
       runtime: Runtime.NODEJS_16_X,
       layers: [lambdaLayer],
       environment: {
         NODE_PATH: '$NODE_PATH:/opt',
+        IS_FUNKY: 'TRUE',
       },
     });
 
