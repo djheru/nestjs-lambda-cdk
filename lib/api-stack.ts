@@ -8,7 +8,8 @@ import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-al
 import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Code, Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
+import { ApiGatewayv2DomainProperties } from 'aws-cdk-lib/aws-route53-targets';
 import { pascalCase } from 'change-case';
 import { Construct } from 'constructs';
 import { resolve } from 'path';
@@ -62,6 +63,17 @@ export class ApiStack extends Stack {
       defaultDomainMapping: {
         domainName: apigDomainName,
       },
+      disableExecuteApiEndpoint: true,
+    });
+
+    new ARecord(this, `$this.id}-a-record`, {
+      zone: hostedZone,
+      target: RecordTarget.fromAlias(
+        new ApiGatewayv2DomainProperties(
+          apigDomainName.regionalDomainName,
+          apigDomainName.regionalHostedZoneId
+        )
+      ),
     });
 
     const lambdaLayer = new LayerVersion(this, `${this.id}-lambda-layer`, {
