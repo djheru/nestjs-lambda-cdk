@@ -1,14 +1,36 @@
-import { CorsHttpMethod, HttpApi, HttpMethod } from '@aws-cdk/aws-apigatewayv2-alpha';
+import {
+  CorsHttpMethod,
+  DomainName,
+  HttpApi,
+  HttpMethod,
+} from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Code, Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { pascalCase } from 'change-case';
 import { Construct } from 'constructs';
 import { resolve } from 'path';
 
+export interface ApiStackProps extends StackProps {
+  certArn: string;
+  domainName: string;
+  stageName: string;
+}
+
 export class ApiStack extends Stack {
-  constructor(scope: Construct, private id: string, private props?: StackProps) {
+  constructor(scope: Construct, private id: string, private props: ApiStackProps) {
     super(scope, id, props);
+
+    const { certArn, domainName, stageName } = props;
+
+    const stageDomainName =
+      stageName === 'prod' ? domainName : `${stageName}.${domainName}`;
+
+    const apigDomainName = new DomainName(this, `${this.id}-domain-name`, {
+      domainName: `api.${stageDomainName}`,
+      certificate: Certificate.fromCertificateArn(this, `${this.id}-cert`, certArn),
+    });
 
     const httpApi = new HttpApi(this, `${this.id}-http-api`, {
       description: 'Sample HTTP API with Lambda integration running Nestjs',
@@ -23,7 +45,10 @@ export class ApiStack extends Stack {
           CorsHttpMethod.DELETE,
         ],
         allowCredentials: true,
-        allowOrigins: ['http://localhost:3000'],
+        allowOrigins: ['http://localhost:3000', `https://www.${stageDomainName}`],
+      },
+      defaultDomainMapping: {
+        domainName: apigDomainName,
       },
     });
 
