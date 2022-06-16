@@ -5,7 +5,6 @@ import { Construct } from 'constructs';
 import { ApiApplicationStage } from './api-application-stage';
 
 export interface NestjsLambdaCdkStackProps extends StackProps {
-  certArn: string;
   codestartConnectionArn: string;
   domainName: string;
   githubBranchName: string;
@@ -19,7 +18,7 @@ export class ApiPipelineStack extends Stack {
   ) {
     super(scope, id, props);
 
-    const { certArn, domainName } = props;
+    const { domainName } = props;
 
     const pipelineId = `${this.id}-pipeline`;
     const pipeline = new CodePipeline(this, pipelineId, {
@@ -37,7 +36,6 @@ export class ApiPipelineStack extends Stack {
     });
 
     const apiApplicationStage = new ApiApplicationStage(this, `${pipelineId}-dev`, {
-      certArn,
       domainName,
       stageName: 'dev',
     });

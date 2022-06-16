@@ -6,14 +6,14 @@ import {
 } from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
-import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Code, Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { pascalCase } from 'change-case';
 import { Construct } from 'constructs';
 import { resolve } from 'path';
 
 export interface ApiStackProps extends StackProps {
-  certArn: string;
   domainName: string;
   stageName: string;
 }
@@ -22,14 +22,26 @@ export class ApiStack extends Stack {
   constructor(scope: Construct, private id: string, private props: ApiStackProps) {
     super(scope, id, props);
 
-    const { certArn, domainName, stageName } = props;
+    const { domainName, stageName } = props;
 
     const stageDomainName =
-      stageName === 'prod' ? domainName : `${stageName}.${domainName}`;
+      stageName === 'prod' ? `${domainName}` : `${stageName}.${domainName}`;
+
+    const hostedZoneId = `${this.id}-hostedZone`;
+    const hostedZone = HostedZone.fromLookup(this, hostedZoneId, {
+      domainName,
+      privateZone: false,
+    });
+
+    const certificateId = `${this.id}-cert`;
+    const certificate = new Certificate(this, certificateId, {
+      domainName: `api.${stageDomainName}`,
+      validation: CertificateValidation.fromDns(hostedZone),
+    });
 
     const apigDomainName = new DomainName(this, `${this.id}-domain-name`, {
       domainName: `api.${stageDomainName}`,
-      certificate: Certificate.fromCertificateArn(this, `${this.id}-cert`, certArn),
+      certificate,
     });
 
     const httpApi = new HttpApi(this, `${this.id}-http-api`, {
