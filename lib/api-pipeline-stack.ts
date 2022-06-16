@@ -36,11 +36,15 @@ export class ApiPipelineStack extends Stack {
       }),
     });
 
-    const apiApplicationStage = new ApiApplicationStage(this, `${pipelineId}-dev`, {
-      domainName,
-      stageName,
-      env: this.props.env,
-    });
+    const apiApplicationStage = new ApiApplicationStage(
+      this,
+      `${pipelineId}-${stageName}`,
+      {
+        domainName,
+        stageName,
+        env: this.props.env,
+      }
+    );
 
     pipeline.addStage(apiApplicationStage);
   }
