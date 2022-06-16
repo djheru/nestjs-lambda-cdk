@@ -61,7 +61,6 @@ export class ApiStack extends Stack {
       },
       defaultDomainMapping: {
         domainName: apigDomainName,
-        mappingKey: '/',
       },
     });
 
