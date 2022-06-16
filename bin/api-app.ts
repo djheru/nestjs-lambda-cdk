@@ -3,8 +3,6 @@ import * as cdk from 'aws-cdk-lib';
 import 'source-map-support/register';
 import { ApiPipelineStack } from '../lib/api-pipeline-stack';
 
-console.log(JSON.stringify(process.env));
-
 const {
   CDK_ENV: environmentName = 'dev',
   CDK_DEFAULT_ACCOUNT,
