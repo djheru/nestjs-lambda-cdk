@@ -16,6 +16,7 @@ export class ApiApplicationStage extends Stage {
     new ApiStack(this, `${this.id}-api`, {
       domainName,
       stageName,
+      env: props.env,
     });
   }
 }

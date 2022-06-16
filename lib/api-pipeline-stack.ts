@@ -39,6 +39,7 @@ export class ApiPipelineStack extends Stack {
     const apiApplicationStage = new ApiApplicationStage(this, `${pipelineId}-dev`, {
       domainName,
       stageName,
+      env: this.props.env,
     });
 
     pipeline.addStage(apiApplicationStage);
