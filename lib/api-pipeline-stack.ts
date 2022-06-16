@@ -5,8 +5,9 @@ import { Construct } from 'constructs';
 import { ApiApplicationStage } from './api-application-stage';
 
 export interface NestjsLambdaCdkStackProps extends StackProps {
-  codestartConnectionArn: string;
+  codestarConnectionArn: string;
   domainName: string;
+  environmentName: string;
   githubBranchName: string;
   githubPath: string;
 }
@@ -18,7 +19,7 @@ export class ApiPipelineStack extends Stack {
   ) {
     super(scope, id, props);
 
-    const { domainName } = props;
+    const { domainName, environmentName: stageName } = props;
 
     const pipelineId = `${this.id}-pipeline`;
     const pipeline = new CodePipeline(this, pipelineId, {
@@ -28,7 +29,7 @@ export class ApiPipelineStack extends Stack {
           this.props.githubPath,
           this.props.githubBranchName,
           {
-            connectionArn: this.props.codestartConnectionArn,
+            connectionArn: this.props.codestarConnectionArn,
           }
         ),
         commands: ['npm ci', 'npm run build', 'npx cdk synth'],
@@ -37,7 +38,7 @@ export class ApiPipelineStack extends Stack {
 
     const apiApplicationStage = new ApiApplicationStage(this, `${pipelineId}-dev`, {
       domainName,
-      stageName: 'dev',
+      stageName,
     });
 
     pipeline.addStage(apiApplicationStage);
