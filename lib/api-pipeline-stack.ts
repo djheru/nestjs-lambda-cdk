@@ -1,12 +1,6 @@
-import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
-import { CorsHttpMethod, HttpApi, HttpMethod } from '@aws-cdk/aws-apigatewayv2-alpha';
-import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
-import { Construct } from 'constructs';
-import { Code, Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { resolve } from 'path';
-import { pascalCase } from 'change-case';
+import { Stack, StackProps } from 'aws-cdk-lib';
 import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
-import { ApiStack } from './api-stack';
+import { Construct } from 'constructs';
 import { ApiApplicationStage } from './api-application-stage';
 
 export interface NestjsLambdaCdkStackProps extends StackProps {
@@ -22,7 +16,8 @@ export class ApiPipelineStack extends Stack {
   ) {
     super(scope, id, props);
 
-    const pipeline = new CodePipeline(this, `${this.id}-pipeline`, {
+    const pipelineId = `${this.id}-pipeline`;
+    const pipeline = new CodePipeline(this, pipelineId, {
       synth: new ShellStep('Synth', {
         input: CodePipelineSource.connection(
           this.props.githubPath,
@@ -35,6 +30,6 @@ export class ApiPipelineStack extends Stack {
       }),
     });
 
-    pipeline.addStage(new ApiApplicationStage(this, 'Dev'));
+    pipeline.addStage(new ApiApplicationStage(this, `${pipelineId}-dev`));
   }
 }

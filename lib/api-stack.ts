@@ -1,10 +1,10 @@
-import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
 import { CorsHttpMethod, HttpApi, HttpMethod } from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
-import { Construct } from 'constructs';
+import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
 import { Code, Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { resolve } from 'path';
 import { pascalCase } from 'change-case';
+import { Construct } from 'constructs';
+import { resolve } from 'path';
 
 export class ApiStack extends Stack {
   constructor(scope: Construct, private id: string, private props?: StackProps) {
