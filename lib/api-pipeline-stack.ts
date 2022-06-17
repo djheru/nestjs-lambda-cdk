@@ -38,7 +38,7 @@ export class ApiPipelineStack extends Stack {
 
     const apiApplicationStage = new ApiApplicationStage(
       this,
-      `${pipelineId}-${stageName}`,
+      pascalCase(`${pipelineId}-${stageName}`),
       {
         domainName,
         stageName,

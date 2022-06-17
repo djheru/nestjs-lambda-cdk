@@ -12,17 +12,18 @@ const {
   DOMAIN_NAME: domainName = 'flexiledger.com',
   CODESTAR_CONNECTION_ARN:
     codestarConnectionArn = 'arn:aws:codestar-connections:us-east-1:205375198116:connection/e54f0a47-fef3-4cf8-8734-bb679211c671',
-  GITHUB_BRANCH_NAME: githubBranchName = 'main',
   GITHUB_PATH: githubPath = 'djheru/nestjs-lambda-cdk',
 } = process.env;
+
+const githubBranchName = environmentName === 'prod' ? 'main' : environmentName;
 
 const account = CDK_DEFAULT_ACCOUNT || AWS_DEFAULT_ACCOUNT_ID;
 const region = CDK_DEFAULT_REGION || AWS_DEFAULT_REGION;
 
 const app = new cdk.App();
 
-new ApiPipelineStack(app, 'nestjs-lambda-cdk', {
-  description: 'Sample API with API Gateway -> Lambda -> Nestjs',
+new ApiPipelineStack(app, 'flexiledger', {
+  description: 'Flexiledger Application',
   env: { account, region },
   codestarConnectionArn,
   domainName,

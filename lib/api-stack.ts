@@ -25,6 +25,9 @@ export class ApiStack extends Stack {
 
     const { domainName, stageName } = props;
 
+    const stageDomainName =
+      stageName === 'prod' ? `api.${domainName}` : `api.${stageName}.${domainName}`;
+
     const hostedZoneId = `${this.id}-hostedZone`;
     const hostedZone = HostedZone.fromLookup(this, hostedZoneId, {
       domainName,
@@ -33,12 +36,12 @@ export class ApiStack extends Stack {
 
     const certificateId = `${this.id}-cert`;
     const certificate = new Certificate(this, certificateId, {
-      domainName: `api.${domainName}`,
+      domainName: stageDomainName,
       validation: CertificateValidation.fromDns(hostedZone),
     });
 
     const apigDomainName = new DomainName(this, `${this.id}-domain-name`, {
-      domainName: `api.${domainName}`,
+      domainName: stageDomainName,
       certificate,
     });
 
@@ -55,11 +58,10 @@ export class ApiStack extends Stack {
           CorsHttpMethod.DELETE,
         ],
         allowCredentials: true,
-        allowOrigins: ['http://localhost:3000', `https://www.${domainName}`],
+        allowOrigins: ['http://localhost:3000', `https://www.${stageDomainName}`],
       },
       defaultDomainMapping: {
         domainName: apigDomainName,
-        mappingKey: stageName,
       },
       disableExecuteApiEndpoint: true,
     });
