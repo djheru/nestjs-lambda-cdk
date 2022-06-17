@@ -26,7 +26,7 @@ export class ApiStack extends Stack {
     const { domainName, stageName } = props;
 
     const stageDomainName =
-      stageName === 'prod' ? `api.${domainName}` : `api.${stageName}.${domainName}`;
+      stageName === 'prod' ? `api.${domainName}` : `${stageName}-api.${domainName}`;
 
     const hostedZoneId = `${this.id}-hostedZone`;
     const hostedZone = HostedZone.fromLookup(this, hostedZoneId, {
@@ -64,6 +64,10 @@ export class ApiStack extends Stack {
         domainName: apigDomainName,
       },
       disableExecuteApiEndpoint: true,
+    });
+
+    new CfnOutput(this, pascalCase(`${this.id}-regional-domain-name`), {
+      value: apigDomainName.regionalDomainName,
     });
 
     new ARecord(this, `$this.id}-a-record`, {
