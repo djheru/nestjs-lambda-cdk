@@ -14,6 +14,7 @@ export class ApiApplicationStage extends Stage {
     const { domainName, stageName } = props;
 
     new ApiStack(this, `${this.id}-api`, {
+      stackName: `${this.id}-api-stack`,
       domainName,
       stageName,
       env: props.env,
