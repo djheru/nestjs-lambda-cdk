@@ -5,10 +5,10 @@ import {
   HttpMethod,
 } from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
-import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Code, Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
+import { ARecord, HostedZone, NsRecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { ApiGatewayv2DomainProperties } from 'aws-cdk-lib/aws-route53-targets';
 import { pascalCase } from 'change-case';
 import { Construct } from 'constructs';
@@ -32,10 +32,11 @@ export class ApiStack extends Stack {
     const hostedZone = new HostedZone(this, hostedZoneId, {
       zoneName: stageDomainName,
     });
-    // const hostedZone = HostedZone.fromLookup(this, hostedZoneId, {
-    //   domainName,
-    //   privateZone: false,
-    // });
+
+    const parentHostedZone = HostedZone.fromLookup(this, `${hostedZoneId}-parent`, {
+      domainName,
+      privateZone: false,
+    });
 
     const certificateId = `${this.id}-cert`;
     const certificate = new Certificate(this, certificateId, {
@@ -65,7 +66,7 @@ export class ApiStack extends Stack {
       },
       defaultDomainMapping: {
         domainName: apigDomainName,
-        mappingKey: '/v1',
+        mappingKey: 'v1/',
       },
       disableExecuteApiEndpoint: true,
     });
@@ -74,7 +75,7 @@ export class ApiStack extends Stack {
       value: stageDomainName,
     });
 
-    new ARecord(this, `$this.id}-a-record`, {
+    new ARecord(this, `${this.id}-a-record`, {
       zone: hostedZone,
       target: RecordTarget.fromAlias(
         new ApiGatewayv2DomainProperties(
@@ -82,6 +83,13 @@ export class ApiStack extends Stack {
           apigDomainName.regionalHostedZoneId
         )
       ),
+    });
+
+    new NsRecord(this, `${this.id}-a-record`, {
+      values: hostedZone.hostedZoneNameServers || [],
+      zone: parentHostedZone,
+      recordName: stageDomainName,
+      ttl: Duration.seconds(60),
     });
 
     const lambdaLayer = new LayerVersion(this, `${this.id}-lambda-layer`, {

@@ -1,4 +1,5 @@
 import { Stage, StageProps } from 'aws-cdk-lib';
+import { paramCase } from 'change-case';
 import { Construct } from 'constructs';
 import { ApiStack } from './api-stack';
 
@@ -14,7 +15,7 @@ export class ApiApplicationStage extends Stage {
     const { domainName, stageName } = props;
 
     new ApiStack(this, `${this.id}-api`, {
-      stackName: `${this.id}-api-stack`,
+      stackName: `${paramCase(this.id)}-api-stack`,
       domainName,
       stageName,
       env: props.env,
