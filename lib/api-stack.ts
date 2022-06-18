@@ -25,8 +25,8 @@ export class ApiStack extends Stack {
 
     const { domainName, stageName } = props;
 
-    const stageDomainName =
-      stageName === 'prod' ? `api.${domainName}` : `api.${stageName}.${domainName}`;
+    const stageDomainName = `${stageName}.${domainName}`;
+    const appDomainName = `api.${stageDomainName}`;
 
     const hostedZoneId = pascalCase(`${this.id}-hostedZone`);
     const hostedZone = new HostedZone(this, hostedZoneId, {
@@ -44,12 +44,12 @@ export class ApiStack extends Stack {
 
     const certificateId = pascalCase(`${this.id}-cert`);
     const certificate = new Certificate(this, certificateId, {
-      domainName: stageDomainName,
+      domainName: appDomainName,
       validation: CertificateValidation.fromDns(hostedZone),
     });
 
     const apigDomainName = new DomainName(this, pascalCase(`${this.id}-domain-name`), {
-      domainName: stageDomainName,
+      domainName: appDomainName,
       certificate,
     });
 
@@ -66,7 +66,7 @@ export class ApiStack extends Stack {
           CorsHttpMethod.DELETE,
         ],
         allowCredentials: true,
-        allowOrigins: ['http://localhost:3000', `https://www.${stageDomainName}`],
+        allowOrigins: ['http://localhost:3000', `https://www.${domainName}`],
       },
       defaultDomainMapping: {
         domainName: apigDomainName,
@@ -76,7 +76,7 @@ export class ApiStack extends Stack {
     });
 
     new CfnOutput(this, pascalCase(`${this.id}-domain-name-output`), {
-      value: stageDomainName,
+      value: appDomainName,
     });
 
     new ARecord(this, pascalCase(`${this.id}-a-record`), {
@@ -92,7 +92,7 @@ export class ApiStack extends Stack {
     new NsRecord(this, pascalCase(`${this.id}-ns-record`), {
       values: hostedZone.hostedZoneNameServers || [],
       zone: parentHostedZone,
-      recordName: stageDomainName,
+      recordName: appDomainName,
       ttl: Duration.seconds(60),
     });
 
