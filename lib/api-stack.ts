@@ -26,13 +26,16 @@ export class ApiStack extends Stack {
     const { domainName, stageName } = props;
 
     const stageDomainName =
-      stageName === 'prod' ? `api.${domainName}` : `${stageName}-api.${domainName}`;
+      stageName === 'prod' ? `api.${domainName}` : `api.${stageName}.${domainName}`;
 
     const hostedZoneId = `${this.id}-hostedZone`;
-    const hostedZone = HostedZone.fromLookup(this, hostedZoneId, {
-      domainName,
-      privateZone: false,
+    const hostedZone = new HostedZone(this, hostedZoneId, {
+      zoneName: stageDomainName,
     });
+    // const hostedZone = HostedZone.fromLookup(this, hostedZoneId, {
+    //   domainName,
+    //   privateZone: false,
+    // });
 
     const certificateId = `${this.id}-cert`;
     const certificate = new Certificate(this, certificateId, {
@@ -62,12 +65,13 @@ export class ApiStack extends Stack {
       },
       defaultDomainMapping: {
         domainName: apigDomainName,
+        mappingKey: '/v1',
       },
       disableExecuteApiEndpoint: true,
     });
 
-    new CfnOutput(this, pascalCase(`${this.id}-regional-domain-name`), {
-      value: apigDomainName.regionalDomainName,
+    new CfnOutput(this, pascalCase(`${this.id}-domain-name`), {
+      value: stageDomainName,
     });
 
     new ARecord(this, `$this.id}-a-record`, {
