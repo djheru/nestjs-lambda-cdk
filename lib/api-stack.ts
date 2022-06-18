@@ -30,7 +30,7 @@ export class ApiStack extends Stack {
 
     const hostedZoneId = pascalCase(`${this.id}-hostedZone`);
     const hostedZone = new HostedZone(this, hostedZoneId, {
-      zoneName: stageDomainName,
+      zoneName: appDomainName,
     });
 
     const parentHostedZone = HostedZone.fromLookup(
@@ -83,7 +83,7 @@ export class ApiStack extends Stack {
       zone: hostedZone,
       target: RecordTarget.fromAlias(
         new ApiGatewayv2DomainProperties(
-          appDomainName,
+          apigDomainName.regionalDomainName,
           apigDomainName.regionalHostedZoneId
         )
       ),
