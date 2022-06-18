@@ -28,28 +28,32 @@ export class ApiStack extends Stack {
     const stageDomainName =
       stageName === 'prod' ? `api.${domainName}` : `api.${stageName}.${domainName}`;
 
-    const hostedZoneId = `${this.id}-hostedZone`;
+    const hostedZoneId = pascalCase(`${this.id}-hostedZone`);
     const hostedZone = new HostedZone(this, hostedZoneId, {
       zoneName: stageDomainName,
     });
 
-    const parentHostedZone = HostedZone.fromLookup(this, `${hostedZoneId}-parent`, {
-      domainName,
-      privateZone: false,
-    });
+    const parentHostedZone = HostedZone.fromLookup(
+      this,
+      pascalCase(`${hostedZoneId}-parent`),
+      {
+        domainName,
+        privateZone: false,
+      }
+    );
 
-    const certificateId = `${this.id}-cert`;
+    const certificateId = pascalCase(`${this.id}-cert`);
     const certificate = new Certificate(this, certificateId, {
       domainName: stageDomainName,
       validation: CertificateValidation.fromDns(hostedZone),
     });
 
-    const apigDomainName = new DomainName(this, `${this.id}-domain-name`, {
+    const apigDomainName = new DomainName(this, pascalCase(`${this.id}-domain-name`), {
       domainName: stageDomainName,
       certificate,
     });
 
-    const httpApi = new HttpApi(this, `${this.id}-http-api`, {
+    const httpApi = new HttpApi(this, pascalCase(`${this.id}-http-api`), {
       description: 'Sample HTTP API with Lambda integration running Nestjs',
       corsPreflight: {
         allowHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key'],
@@ -75,7 +79,7 @@ export class ApiStack extends Stack {
       value: stageDomainName,
     });
 
-    new ARecord(this, `${this.id}-a-record`, {
+    new ARecord(this, pascalCase(`${this.id}-a-record`), {
       zone: hostedZone,
       target: RecordTarget.fromAlias(
         new ApiGatewayv2DomainProperties(
@@ -85,20 +89,20 @@ export class ApiStack extends Stack {
       ),
     });
 
-    new NsRecord(this, `${this.id}-a-record`, {
+    new NsRecord(this, pascalCase(`${this.id}-a-record`), {
       values: hostedZone.hostedZoneNameServers || [],
       zone: parentHostedZone,
       recordName: stageDomainName,
       ttl: Duration.seconds(60),
     });
 
-    const lambdaLayer = new LayerVersion(this, `${this.id}-lambda-layer`, {
+    const lambdaLayer = new LayerVersion(this, pascalCase(`${this.id}-lambda-layer`), {
       code: Code.fromAsset(resolve(__dirname, '../api/dist/node_modules')),
       compatibleRuntimes: [Runtime.NODEJS_14_X, Runtime.NODEJS_16_X],
       description: 'Node modules for lambda functions',
     });
 
-    const handler = new Function(this, `${this.id}-lambda-fcn`, {
+    const handler = new Function(this, pascalCase(`${this.id}-lambda-fcn`), {
       code: Code.fromAsset(resolve(__dirname, '../api/dist'), {
         exclude: ['../api/dist/node_modules'],
       }),
@@ -114,7 +118,10 @@ export class ApiStack extends Stack {
     httpApi.addRoutes({
       path: '/',
       methods: [HttpMethod.ANY],
-      integration: new HttpLambdaIntegration(`${this.id}-http-integration`, handler),
+      integration: new HttpLambdaIntegration(
+        pascalCase(`${this.id}-http-integration`),
+        handler
+      ),
     });
 
     new CfnOutput(this, pascalCase(`${this.id}-api-url`), {
