@@ -83,7 +83,7 @@ export class ApiStack extends Stack {
       zone: hostedZone,
       target: RecordTarget.fromAlias(
         new ApiGatewayv2DomainProperties(
-          apigDomainName.regionalDomainName,
+          appDomainName,
           apigDomainName.regionalHostedZoneId
         )
       ),
