@@ -89,7 +89,7 @@ export class ApiStack extends Stack {
       ),
     });
 
-    new NsRecord(this, pascalCase(`${this.id}-a-record`), {
+    new NsRecord(this, pascalCase(`${this.id}-ns-record`), {
       values: hostedZone.hostedZoneNameServers || [],
       zone: parentHostedZone,
       recordName: stageDomainName,
