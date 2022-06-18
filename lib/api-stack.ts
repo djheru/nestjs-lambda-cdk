@@ -70,7 +70,7 @@ export class ApiStack extends Stack {
       },
       defaultDomainMapping: {
         domainName: apigDomainName,
-        mappingKey: 'v1/',
+        mappingKey: 'v1',
       },
       disableExecuteApiEndpoint: true,
     });
