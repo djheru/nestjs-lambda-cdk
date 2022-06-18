@@ -75,7 +75,7 @@ export class ApiStack extends Stack {
       disableExecuteApiEndpoint: true,
     });
 
-    new CfnOutput(this, pascalCase(`${this.id}-domain-name`), {
+    new CfnOutput(this, pascalCase(`${this.id}-domain-name-output`), {
       value: stageDomainName,
     });
 
