@@ -5,8 +5,6 @@ import 'dotenv/config';
 import 'source-map-support/register';
 import { PipelineStack } from '../lib/pipeline-stack';
 
-console.log(process.env);
-
 const {
   AWS_DEFAULT_ACCOUNT_ID,
   AWS_DEFAULT_REGION,
