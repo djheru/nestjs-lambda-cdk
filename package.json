@@ -1,5 +1,5 @@
 {
-  "name": "nestjs-lambda-cdk",
+  "name": "@flexiledger/app",
   "version": "0.1.0",
   "bin": {
     "nestjs-lambda-cdk": "bin/nestjs-lambda-cdk.js"
@@ -30,6 +30,7 @@
     "aws-cdk-lib": "2.27.0",
     "change-case": "^4.1.2",
     "constructs": "^10.1.35",
+    "dotenv": "^16.0.1",
     "source-map-support": "^0.5.21"
   }
 }
