@@ -2,28 +2,24 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
 import { pascalCase } from 'change-case';
 import { Construct } from 'constructs';
-import { ApiApplicationStage } from './api-application-stage';
+import { ApplicationStage } from './application-stage';
 
-export interface NestjsLambdaCdkStackProps extends StackProps {
+export interface PipelineStackProps extends StackProps {
   codestarConnectionArn: string;
   domainName: string;
   environmentName: string;
   githubBranchName: string;
   githubPath: string;
 }
-export class ApiPipelineStack extends Stack {
-  constructor(
-    scope: Construct,
-    private id: string,
-    private props: NestjsLambdaCdkStackProps
-  ) {
+export class PipelineStack extends Stack {
+  constructor(scope: Construct, private id: string, private props: PipelineStackProps) {
     super(scope, id, props);
 
     const { domainName, environmentName: stageName } = props;
 
-    const pipelineId = `${this.id}-pipeline`;
+    const pipelineId = pascalCase(`${this.id}-pipeline`);
     const pipeline = new CodePipeline(this, pipelineId, {
-      pipelineName: pascalCase(pipelineId),
+      pipelineName: pipelineId,
       synth: new ShellStep('Synth', {
         input: CodePipelineSource.connection(
           this.props.githubPath,
@@ -36,9 +32,9 @@ export class ApiPipelineStack extends Stack {
       }),
     });
 
-    const apiApplicationStage = new ApiApplicationStage(
+    const applicationStage = new ApplicationStage(
       this,
-      pascalCase(`${pipelineId}-${stageName}`),
+      pascalCase(`${this.id}-${stageName}`),
       {
         domainName,
         stageName,
@@ -46,6 +42,6 @@ export class ApiPipelineStack extends Stack {
       }
     );
 
-    pipeline.addStage(apiApplicationStage);
+    pipeline.addStage(applicationStage);
   }
 }
