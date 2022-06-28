@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    labels:
+      - 'Meta: Bot-Infra'
+      - 'Type: Chore-Infra'
+    open-pull-requests-limit: 25
+  - package-ecosystem: 'npm'
+    directory: '/api'
+    schedule:
+      interval: 'weekly'
+    labels:
+      - 'Meta: Bot-API'
+      - 'Type: Chore-API'
+    open-pull-requests-limit: 25
