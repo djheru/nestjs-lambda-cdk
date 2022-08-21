@@ -1,5 +1,5 @@
 {
-  "name": "@flexiledger/app",
+  "name": "@planningpoker/app",
   "version": "0.1.0",
   "bin": {
     "nestjs-lambda-cdk": "bin/nestjs-lambda-cdk.js"
