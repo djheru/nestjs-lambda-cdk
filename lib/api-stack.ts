@@ -5,8 +5,9 @@ import {
   HttpMethod,
 } from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
-import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
+import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Code, Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { ARecord, HostedZone, NsRecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { ApiGatewayv2DomainProperties } from 'aws-cdk-lib/aws-route53-targets';
@@ -96,6 +97,24 @@ export class ApiStack extends Stack {
       ttl: Duration.seconds(60),
     });
 
+    const ddbTable = new Table(this, `${this.id}-mfa-table`, {
+      tableName: 'MFATable',
+      partitionKey: {
+        name: 'pk',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'sk',
+        type: AttributeType.STRING,
+      },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+    new CfnOutput(this, 'MFATableArn', {
+      value: ddbTable.tableArn,
+      exportName: 'MFATableArn',
+    });
+
     const lambdaLayer = new LayerVersion(this, pascalCase(`${this.id}-lambda-layer`), {
       code: Code.fromAsset(resolve(__dirname, '../api/dist/node_modules')),
       compatibleRuntimes: [Runtime.NODEJS_14_X, Runtime.NODEJS_16_X],
@@ -111,9 +130,11 @@ export class ApiStack extends Stack {
       layers: [lambdaLayer],
       environment: {
         NODE_PATH: '$NODE_PATH:/opt',
-        IS_FUNKY: 'TRUE',
+        TABLE_NAME: ddbTable.tableName,
       },
     });
+
+    ddbTable.grantFullAccess(handler);
 
     httpApi.addRoutes({
       path: '/',
