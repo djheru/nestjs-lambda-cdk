@@ -5,10 +5,11 @@ import {
   HttpMethod,
 } from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
-import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
+import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Code, Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { ARecord, HostedZone, NsRecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
+import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { ApiGatewayv2DomainProperties } from 'aws-cdk-lib/aws-route53-targets';
 import { pascalCase } from 'change-case';
 import { Construct } from 'constructs';
@@ -25,35 +26,27 @@ export class ApiStack extends Stack {
 
     const { domainName, stageName } = props;
 
-    const stageDomainName = `${stageName}.${domainName}`;
-    const appDomainName = `api.${stageDomainName}`;
+    const stageDomainName =
+      stageName === 'prod' ? `api.${domainName}` : `api.${stageName}.${domainName}`;
 
-    const hostedZoneId = pascalCase(`${this.id}-hostedZone`);
-    const hostedZone = new HostedZone(this, hostedZoneId, {
-      zoneName: appDomainName,
+    const hostedZoneId = `${this.id}-hostedZone`;
+    const hostedZone = HostedZone.fromLookup(this, hostedZoneId, {
+      domainName,
+      privateZone: false,
     });
 
-    const parentHostedZone = HostedZone.fromLookup(
-      this,
-      pascalCase(`${hostedZoneId}-parent`),
-      {
-        domainName,
-        privateZone: false,
-      }
-    );
-
-    const certificateId = pascalCase(`${this.id}-cert`);
+    const certificateId = `${this.id}-cert`;
     const certificate = new Certificate(this, certificateId, {
-      domainName: appDomainName,
+      domainName: stageDomainName,
       validation: CertificateValidation.fromDns(hostedZone),
     });
 
-    const apigDomainName = new DomainName(this, pascalCase(`${this.id}-domain-name`), {
-      domainName: appDomainName,
+    const apigDomainName = new DomainName(this, `${this.id}-domain-name`, {
+      domainName: stageDomainName,
       certificate,
     });
 
-    const httpApi = new HttpApi(this, pascalCase(`${this.id}-http-api`), {
+    const httpApi = new HttpApi(this, `${this.id}-http-api`, {
       description: 'Sample HTTP API with Lambda integration running Nestjs',
       corsPreflight: {
         allowHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key'],
@@ -66,20 +59,15 @@ export class ApiStack extends Stack {
           CorsHttpMethod.DELETE,
         ],
         allowCredentials: true,
-        allowOrigins: ['http://localhost:3000', `https://www.${domainName}`],
+        allowOrigins: ['http://localhost:3000', `https://www.${stageDomainName}`],
       },
       defaultDomainMapping: {
         domainName: apigDomainName,
-        mappingKey: 'v1',
       },
       disableExecuteApiEndpoint: true,
     });
 
-    new CfnOutput(this, pascalCase(`${this.id}-domain-name-output`), {
-      value: appDomainName,
-    });
-
-    new ARecord(this, pascalCase(`${this.id}-a-record`), {
+    new ARecord(this, `$this.id}-a-record`, {
       zone: hostedZone,
       target: RecordTarget.fromAlias(
         new ApiGatewayv2DomainProperties(
@@ -89,20 +77,31 @@ export class ApiStack extends Stack {
       ),
     });
 
-    new NsRecord(this, pascalCase(`${this.id}-ns-record`), {
-      values: hostedZone.hostedZoneNameServers || [],
-      zone: parentHostedZone,
-      recordName: appDomainName,
-      ttl: Duration.seconds(60),
+    const ddbTable = new Table(this, `${this.id}-mfa-table`, {
+      tableName: 'MFATable',
+      partitionKey: {
+        name: 'pk',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'sk',
+        type: AttributeType.STRING,
+      },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+    new CfnOutput(this, 'MFATableArn', {
+      value: ddbTable.tableArn,
+      exportName: 'MFATableArn',
     });
 
-    const lambdaLayer = new LayerVersion(this, pascalCase(`${this.id}-lambda-layer`), {
+    const lambdaLayer = new LayerVersion(this, `${this.id}-lambda-layer`, {
       code: Code.fromAsset(resolve(__dirname, '../api/dist/node_modules')),
       compatibleRuntimes: [Runtime.NODEJS_14_X, Runtime.NODEJS_16_X],
       description: 'Node modules for lambda functions',
     });
 
-    const handler = new Function(this, pascalCase(`${this.id}-lambda-fcn`), {
+    const handler = new Function(this, `${this.id}-lambda-fcn`, {
       code: Code.fromAsset(resolve(__dirname, '../api/dist'), {
         exclude: ['../api/dist/node_modules'],
       }),
@@ -111,9 +110,11 @@ export class ApiStack extends Stack {
       layers: [lambdaLayer],
       environment: {
         NODE_PATH: '$NODE_PATH:/opt',
-        IS_FUNKY: 'TRUE',
+        TABLE_NAME: ddbTable.tableName,
       },
     });
+
+    ddbTable.grantFullAccess(handler);
 
     httpApi.addRoutes({
       path: '/',

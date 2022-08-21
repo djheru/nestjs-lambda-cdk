@@ -32,7 +32,8 @@ if (
 }
 const githubPath = `${githubOwner}/${githubRepo}`;
 
-const githubBranchName = environmentName === 'prod' ? 'main' : environmentName;
+const githubBranchName = environmentName === 'prod' ? 'main' : 'poc/mfa';
+// const githubBranchName = environmentName === 'prod' ? 'main' : environmentName;
 
 const account = CDK_DEFAULT_ACCOUNT || AWS_DEFAULT_ACCOUNT_ID;
 const region = CDK_DEFAULT_REGION || AWS_DEFAULT_REGION;
