@@ -11,6 +11,7 @@
     "postbuild": "mkdir -p ./dist/node_modules && cp package.json ./dist/package.json && npm install --prefix ./dist --production",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
+    "start:db": "docker-compose up",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -24,13 +25,16 @@
   "dependencies": {
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
+    "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^8.0.0",
     "@vendia/serverless-express": "^4.8.2",
     "aws-lambda": "^1.0.7",
     "express": "^4.18.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "speakeasy": "^2.0.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",

@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  nestjs-dynamodb:
+    image:  amazon/dynamodb-local
+    container_name: nestjs-dynamodb
+    hostname: dynamodb
+    restart: always
+    volumes:
+      -  ./nestjs-dynamodb-data:/home/dynamodblocal/data
+    ports:
+      - 8000:8000
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data/"
