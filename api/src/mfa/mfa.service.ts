@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { InjectTwilio, TwilioClient } from 'nestjs-twilio';
 import { RegisterMfaUserDto } from './dto/register-mfa-user.dto';
 import { VerifyMfaDto } from './dto/verify-mfa.dto';
 import { MfaUser } from './entities/mfa-user.entity';
@@ -6,7 +7,10 @@ import { MfaTokenService } from './mfa-token.service';
 
 @Injectable()
 export class MfaService {
-  constructor(private readonly tokenService: MfaTokenService) {}
+  constructor(
+    private readonly tokenService: MfaTokenService,
+    @InjectTwilio() private readonly twilioClient: TwilioClient
+  ) {}
 
   async register(registerMfaUserDto: RegisterMfaUserDto) {
     const { userId: id, identifier, identifierType } = registerMfaUserDto;
@@ -23,6 +27,13 @@ export class MfaService {
     const token = this.tokenService.generateToken(secret);
 
     console.log({ token });
+    const response = await this.twilioClient.messages.create({
+      body: `MFA Verification Code: ${token}`,
+      from: '+12136422215',
+      to: '+14806166180',
+    });
+
+    console.log(response);
 
     return { token };
   }
