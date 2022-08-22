@@ -58,6 +58,47 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+# Create Local Table
+
+```
+npm run start:db
+```
+
+```
+aws dynamodb create-table \
+  --billing-mode PAY_PER_REQUEST \
+  --attribute-definitions '[
+            {
+                "AttributeName": "pk",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "sk",
+                "AttributeType": "S"
+            }
+        ]' \
+  --table-name MFATable \
+  --key-schema '[
+            {
+                "AttributeName": "pk",
+                "KeyType": "HASH"
+            },
+            {
+                "AttributeName": "sk",
+                "KeyType": "RANGE"
+            }
+        ]' \
+  --endpoint-url http://localhost:8000
+```
+
+```
+npm i -g dynamodb-admin
+```
+
+```
+DYNAMO_ENDPOINT=http://localhost:8000 dynamodb-admin
+```
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).

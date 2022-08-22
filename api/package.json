@@ -20,7 +20,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "dev": "npm run start:dev"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",
@@ -29,6 +30,8 @@
     "@nestjs/platform-express": "^8.0.0",
     "@vendia/serverless-express": "^4.8.2",
     "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1199.0",
+    "dynamodb-toolbox": "^0.4.3",
     "express": "^4.18.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
@@ -46,6 +49,7 @@
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "dotenv": "^16.0.1",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
