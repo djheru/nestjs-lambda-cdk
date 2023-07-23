@@ -11,7 +11,10 @@ let cachedServer: Handler;
 async function bootstrap() {
   if (!cachedServer) {
     const expressApp = express();
-    const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+    const nestApp = await NestFactory.create(
+      AppModule,
+      new ExpressAdapter(expressApp),
+    );
 
     nestApp.enableCors();
 
