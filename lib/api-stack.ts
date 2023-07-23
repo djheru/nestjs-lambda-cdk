@@ -70,7 +70,12 @@ export class ApiStack extends Stack {
           CorsHttpMethod.DELETE,
         ],
         allowCredentials: true,
-        allowOrigins: ['http://localhost:3000', `https://www.${domainName}`],
+        allowOrigins: [
+          'http://localhost:3000',
+          `https://${domainName}`,
+          `https://www.${domainName}`,
+          `https://${stageDomainName}`,
+        ],
       },
       defaultDomainMapping: {
         domainName: apigDomainName,

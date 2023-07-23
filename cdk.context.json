@@ -1,5 +1,9 @@
 {
   "acknowledged-issue-numbers": [
     25356
-  ]
+  ],
+  "hosted-zone:account=190423078218:domainName=dev.damraventures.com:privateZone=false:region=us-east-1": {
+    "Id": "/hostedzone/Z0250019GI83F58BE2VE",
+    "Name": "dev.damraventures.com."
+  }
 }
