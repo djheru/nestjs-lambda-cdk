@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "echo \"Building API\" && rimraf dist && npm i",
     "build": "nest build",
-    "postbuild": "mkdir -p ./dist/node_modules && cp package.json ./dist/package.json && npm install --prefix ./dist --production",
+    "postbuild": "mkdir -p ./dist/node_modules && cp package.json ./dist/package.json && npm install --prefix ./dist --omit=dev",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

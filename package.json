@@ -9,7 +9,9 @@
     "start": "npm start --prefix ./api",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "predeploy": "npm run build",
+    "deploy": "cdk deploy --require-approval never --all"
   },
   "dependencies": {
     "@aws-cdk/aws-apigatewayv2-alpha": "^2.88.0-alpha.0",
