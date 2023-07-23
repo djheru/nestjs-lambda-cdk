@@ -20,7 +20,11 @@ export interface ApiStackProps extends StackProps {
 }
 
 export class ApiStack extends Stack {
-  constructor(scope: Construct, private id: string, private props: ApiStackProps) {
+  constructor(
+    scope: Construct,
+    private id: string,
+    private props: ApiStackProps
+  ) {
     super(scope, id, props);
 
     const { domainName, stageName } = props;
@@ -37,7 +41,7 @@ export class ApiStack extends Stack {
       this,
       pascalCase(`${hostedZoneId}-parent`),
       {
-        domainName,
+        domainName: stageDomainName,
         privateZone: false,
       }
     );

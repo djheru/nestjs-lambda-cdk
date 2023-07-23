@@ -9,7 +9,11 @@ export interface ApplicationStageProps extends StageProps {
 }
 
 export class ApplicationStage extends Stage {
-  constructor(scope: Construct, private id: string, props: ApplicationStageProps) {
+  constructor(
+    scope: Construct,
+    private id: string,
+    props: ApplicationStageProps
+  ) {
     super(scope, id, props);
 
     const { domainName, stageName } = props;
